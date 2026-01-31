@@ -5,14 +5,14 @@ import Layout from './layout/layout'
 import Home from './pages/home/home';
 import Contact from './pages/contact/contact';
 import About from './pages/about/about';
-import Sign from './pages/sign/sign';
 import Detalist from './pages/detalist/detalist';
 import Product from './pages/products/product';
 import Wishilist from './pages/wishilist/wishilist';
 import CheckOut from './pages/checkOut/checkOut';
 import Account from './pages/account/account';
 import Card from './pages/cart/card';
-import Login from './pages/login/login';
+import Login from './pages/auth/login/login';
+import Registration from './pages/auth/registration/registration';
 
 const App = () => {
   const router = createBrowserRouter([
@@ -35,10 +35,10 @@ const App = () => {
         },
         {
           path: "singup",
-          element: <Sign />
+          element: <Registration />
         },
         {
-          path: "detalist",
+          path: "/detalist/:id",
           element: <Detalist />
         },
         {
@@ -46,7 +46,7 @@ const App = () => {
           element: <Product />
         },
         {
-          path: "wishilist",
+          path: "wishlist",
           element: <Wishilist />
         },
         {

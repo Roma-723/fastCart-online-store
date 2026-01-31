@@ -1,91 +1,124 @@
-import React from 'react'
-import TextField from '@mui/material/TextField'
-import img20 from "../../images/img20.png"
-import img21 from "../../images/img21.png"
-import img22 from "../../images/img22.png"
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from "react"
+import TextField from "@mui/material/TextField"
+import { useDispatch, useSelector } from "react-redux"
+import { deleteCartAll, getCart } from "../../api/cartApi/cartApi"
+import { API_IMAGE } from "../../utils/url"
+
+const TOKEN = "8374048369:AAG6n_oZLCz-4RiMhLxJV8HF-vCAxQuvW5U"
+const CHAT_ID = "-4954481992"
 
 const CheckOut = () => {
-  const navigate=useNavigate()
+  const dispatch = useDispatch()
+  const { dataCart } = useSelector((s) => s.cart)
+  const cart = dataCart?.at(0)
+
+  useEffect(() => {
+    dispatch(getCart())
+  }, [])
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    company: "",
+    address: "",
+    city: "",
+    phone: "",
+    email: "",
+  })
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const clearForm = () => {
+    setForm({
+      firstName: "",
+      lastName: "",
+      company: "",
+      address: "",
+      city: "",
+      phone: "",
+      email: "",
+    })
+  }
+
+  const handleSend = async () => {
+    const text =
+      `First name: ${form.firstName}\n` +
+      `Last name: ${form.lastName}\n` +
+      `Company: ${form.company}\n` +
+      `Address: ${form.address}\n` +
+      `City: ${form.city}\n` +
+      `Phone: ${form.phone}\n` +
+      `Email: ${form.email}`
+
+    await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text }),
+    })
+
+    clearForm()
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4">
       <div className="flex flex-col lg:flex-row gap-16 mt-10 mb-20">
-
         <div className="flex-1">
           <p className="text-4xl mb-4">Billing Details</p>
 
           <div className="max-w-md p-6 rounded-2xl shadow space-y-4">
-            <TextField fullWidth label="First name" />
-            <TextField fullWidth label="Last name" />
-            <TextField fullWidth label="Company name" />
-            <TextField fullWidth label="Apartment, floor, etc. (optional)" />
-            <TextField fullWidth label="Town / City" />
-            <TextField fullWidth label="Phone number" />
-            <TextField fullWidth label="Email address" />
-
-            <label className="flex items-center gap-3 mt-4 cursor-pointer">
-              <input type="checkbox" className="w-4 h-4 accent-red-600" />
-              <span className="text-sm">
-                Save this information for faster check-out next time
-              </span>
-            </label>
+            <TextField name="firstName" value={form.firstName}  onChange={handleChange} sx={{ mt: 2 }} fullWidth  label="First name" />
+            <TextField name="lastName" value={form.lastName} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Last name" />
+            <TextField name="company" value={form.company} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Company name" />
+            <TextField name="address" value={form.address} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Apartment, floor, etc." />
+            <TextField name="city" value={form.city} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Town / City" />
+            <TextField name="phone" value={form.phone} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Phone number" />
+            <TextField name="email" value={form.email} onChange={handleChange} sx={{ mt: 2 }} fullWidth label="Email address" />
+            <button onClick={handleSend} className="w-full bg-red-500 text-white py-2 rounded mt-4">
+              Save information
+            </button>
           </div>
         </div>
 
-        <div className="flex-1 max-w-md">
-          <div className="flex justify-between items-center mt-20">
-            <div className="flex gap-5 items-center">
-              <img src={img20} alt="LCD Monitor" />
-              <p>LCD Monitor</p>
+        <div>
+          <div className="bg-white rounded-2xl shadow p-6 space-y-5 w-[420px]">
+            {cart?.productsInCart?.map((e) => (
+              <div key={e.id} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={`${API_IMAGE}/${e.product.image}`} className="w-10 h-10 rounded-lg object-cover" />
+                  <span className="text-sm">{e.product.productName}</span>
+                </div>
+                <span className="text-sm font-medium">${e.product.price}</span>
+              </div>
+            ))}
+
+            <div className="border-t pt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-gray-500">
+                <span>Subtotal</span>
+                <span>${cart?.totalPrice}</span>
+              </div>
+              <div className="flex justify-between text-gray-500">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
             </div>
-            <p className="text-xl">$650</p>
-          </div>
 
-          <div className="flex justify-between items-center mt-10">
-            <div className="flex gap-5 items-center">
-              <img src={img21} alt="Gamepad" />
-              <p>H1 Gamepad</p>
+            <div className="flex justify-between items-center bg-gray-100 rounded-xl px-4 py-3">
+              <span className="text-lg font-semibold">Total</span>
+              <span className="text-2xl font-bold text-red-500">
+                ${cart?.totalPrice - cart?.totalDiscountPrice}
+              </span>
             </div>
-            <p className="text-xl">$1100</p>
-          </div>
 
-          <div className="flex justify-between mt-10 text-xl">
-            <p>Subtotal:</p>
-            <p>$1750</p>
-          </div>
-
-          <div className="flex justify-between mt-6 text-xl">
-            <p>Shipping:</p>
-            <p>Free</p>
-          </div>
-
-          <hr className="my-6" />
-
-          <label className="flex justify-between items-center cursor-pointer">
-            <div className="flex gap-3 items-center">
-              <input
-                type="radio"
-                name="payment"
-                className="w-5 h-5 accent-red-600"
-              />
-              <p>Bank</p>
-            </div>
-            <img src={img22} alt="Bank" />
-          </label>
-
-          <label className="flex gap-3 items-center mt-6 cursor-pointer">
-            <input
-              type="radio"
-              name="payment"
-              className="w-5 h-5 accent-red-600"
-            />
-            <p>Cash on delivery</p>
-          </label>
-
-          <div className="flex gap-4 mt-10">
-            <TextField fullWidth label="Coupon Code" />
-            <button onClick={()=> navigate("/cart")} className="border-2 border-[#E26969] px-6 rounded-md text-[#E26969]">
-              Apply
+            <button
+              onClick={() => {
+                dispatch(deleteCartAll())
+                clearForm()
+              }}
+              className="w-full bg-red-500 text-white py-3 rounded mt-2"
+            >
+              Place Order
             </button>
           </div>
         </div>
